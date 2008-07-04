@@ -7,6 +7,11 @@ class Tag < ActiveRecord::Base
   cattr_accessor :destroy_unused
   self.destroy_unused = false
   
+  has_and_belongs_to_many :parents, :class_name => 'Tag', :foreign_key => 'tag_id',
+                                                          :association_foreign_key => 'parent_id',
+                                                          :join_table => 'tags_hierarchy'
+
+
   # LIKE is used for cross-database case-insensitivity
   def self.find_or_create_with_like_by_name(name)
     find(:first, :conditions => ["name LIKE ?", name]) || create(:name => name)

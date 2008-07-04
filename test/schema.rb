@@ -3,6 +3,11 @@ ActiveRecord::Schema.define :version => 0 do
     t.column :name, :string
   end
   
+  create_table :tags_hierarchy, :force => true, :id => false do |t|
+    t.column :tag_id, :integer
+    t.column :parent_id, :integer
+  end
+  
   create_table :taggings, :force => true do |t|
     t.column :tag_id, :integer
     t.column :taggable_id, :integer
