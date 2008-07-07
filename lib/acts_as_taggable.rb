@@ -61,6 +61,7 @@ module ActiveRecord #:nodoc:
         #   :exclude - Find models that are not tagged with the given tags
         #   :match_all - Find models that match all of the given tags, not just one
         #   :conditions - A piece of SQL conditions to add to the query
+        #   :exclude_subtags - Find models that are tagged with only given tags, not their subtags
         def find_tagged_with(*args)
           options = find_options_for_find_tagged_with(*args)
           options.blank? ? [] : find(:all, options)
@@ -76,22 +77,24 @@ module ActiveRecord #:nodoc:
           conditions << sanitize_sql(options.delete(:conditions)) if options[:conditions]
           
           taggings_alias, tags_alias = "#{table_name}_taggings", "#{table_name}_tags"
-          
+                    
           if options.delete(:exclude)
+            tc = tags_condition(tags, Tag.table_name, !options.delete(:exclude_subtags))            
             conditions << <<-END
               #{table_name}.id NOT IN
                 (SELECT #{Tagging.table_name}.taggable_id FROM #{Tagging.table_name}
                  INNER JOIN #{Tag.table_name} ON #{Tagging.table_name}.tag_id = #{Tag.table_name}.id
-                 WHERE #{tags_condition(tags)} AND #{Tagging.table_name}.taggable_type = #{quote_value(base_class.name)})
+                 WHERE #{tc} AND #{Tagging.table_name}.taggable_type = #{quote_value(base_class.name)})
             END
           else
             if options.delete(:match_all)
+              tc = tags_condition(tags, Tag.table_name, !options.delete(:exclude_subtags))            
               conditions << <<-END
                 (SELECT COUNT(*) FROM #{Tagging.table_name}
                  INNER JOIN #{Tag.table_name} ON #{Tagging.table_name}.tag_id = #{Tag.table_name}.id
                  WHERE #{Tagging.table_name}.taggable_type = #{quote_value(base_class.name)} AND
                  taggable_id = #{table_name}.id AND
-                 #{tags_condition(tags)}) = #{tags.size}
+                 #{tc}) = #{tags.size}
               END
             else
               conditions << tags_condition(tags, tags_alias)
@@ -139,7 +142,13 @@ module ActiveRecord #:nodoc:
         end
         
        private
-        def tags_condition(tags, table_name = Tag.table_name)
+        def tags_condition(tags, table_name = Tag.table_name, include_subtags = true)
+          # FIXME N+1
+          tags += tags.map do |tag_name| 
+            tag = Tag.find_with_like_by_name(tag_name)            
+            tag ? tag.transitive_children.find(:all) : []
+          end.flatten if include_subtags
+          
           condition = tags.map { |t| sanitize_sql(["#{table_name}.name LIKE ?", t]) }.join(" OR ")
           "(" + condition + ")"
         end

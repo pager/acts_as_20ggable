@@ -11,10 +11,18 @@ class Tag < ActiveRecord::Base
                                                           :association_foreign_key => 'parent_id',
                                                           :join_table => 'tags_hierarchy'
 
+  has_and_belongs_to_many :transitive_children, :class_name => 'Tag', :foreign_key => 'tag_id',
+                                                          :association_foreign_key => 'child_id',
+                                                          :join_table => 'tags_transitive_hierarchy'
 
+  
   # LIKE is used for cross-database case-insensitivity
   def self.find_or_create_with_like_by_name(name)
-    find(:first, :conditions => ["name LIKE ?", name]) || create(:name => name)
+    find_with_like_by_name(name) || create(:name => name)
+  end
+
+  def self.find_with_like_by_name(name)
+    find(:first, :conditions => ["name LIKE ?", name])
   end
   
   def ==(object)
