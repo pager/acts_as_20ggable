@@ -12,6 +12,8 @@ class TagHierarchyBuilderTest < Test::Unit::TestCase
       ['Nature', 'Animals', 'Horse'],
       ['Nature', 'Animals', 'Domestic Animals', 'Cat', 'Kitty'],
     ]
+    
+    assert_equal hierarchy, hierarchy_fixture
   end
   
   def test_dump_synonyms

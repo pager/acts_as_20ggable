@@ -10,7 +10,7 @@ class TagHierarchyBuilder
   
 #protected
   def self.dump_hierarchy
-    []
+    tags_without_children = Tag.with_joined_hierarchy.without_children.with_parents.find(:all)
   end
   
   def self.dump_synonyms
@@ -28,7 +28,7 @@ class TagHierarchyBuilder
   
   def self.dump_orphans
     # FIXME Benchmark it :)
-    Tag.with_joined_hierarchy.without_children.without_parents.without_synonyms.
+    Tag.with_joined_hierarchy_and_synonyms.without_children.without_parents.without_synonyms.
         find(:all, :select => 'name', :order => 'name ASC').map(&:name)
   end
 end
