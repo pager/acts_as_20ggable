@@ -17,6 +17,7 @@ Dependencies.load_paths.insert(0, fixture_path)
 require 'active_record/fixtures'
 
 require File.dirname(__FILE__) + '/../lib/acts_as_taggable'
+require_dependency File.dirname(__FILE__) + '/../lib/tag_hierarchy_builder'
 require_dependency File.dirname(__FILE__) + '/../lib/tag_list'
 require_dependency File.dirname(__FILE__) + '/../lib/tags_helper'
 

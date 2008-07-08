@@ -1,0 +1,16 @@
+cat_synonym_pussy:
+  tag_id: 13
+  synonym_id: 15
+
+cat_synonym_kitty:
+  tag_id: 13
+  synonym_id: 18
+  
+horse_synonym_racehorse:
+  tag_id: 11
+  synonym_id: 16
+
+question_synonym_problem:
+  tag_id: 4
+  synonym_id: 17
+

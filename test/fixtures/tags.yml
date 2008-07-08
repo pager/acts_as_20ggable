@@ -17,3 +17,59 @@ question:
 animal:
   id: 5
   name: Crazy animal
+
+# Fixture based on http://spectator.ru/technology/web-building/tags2null  
+people:
+  id: 6
+  name: People
+
+people_children:
+  id: 7
+  name: Children
+
+people_nude:
+  id: 8
+  name: Nude
+  
+people_me:
+  id: 9
+  name: Me
+
+nature_animals:
+  id: 10
+  name: Animals
+  
+nature_animals_horse:
+  id: 11
+  name: Horse
+  
+nature_animals_domestic:
+  id: 12
+  name: Domestic Animals
+  
+nature_animals_domestic_cat:
+  id: 13
+  name: Cat
+
+nature_animals_domestic_cat_kitten:
+  id: 14
+  name: Kitten
+  
+cat_synonym_pussy:
+  id: 15
+  name: Pussy
+  
+horse_synonym_racehorse:
+  id: 16
+  name: Racehorse
+  
+question_synonym_problem:
+  id: 17
+  name: Problem
+
+cat_synonym_kitty:
+  id: 18
+  name: Kitty
+
+  
+  

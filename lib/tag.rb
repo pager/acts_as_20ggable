@@ -11,6 +11,11 @@ class Tag < ActiveRecord::Base
                                                            :association_foreign_key => 'child_id',
                                                            :join_table => 'tags_hierarchy'
 
+  has_and_belongs_to_many :parents, :class_name => 'Tag', :foreign_key => 'child_id',
+                                                           :association_foreign_key => 'tag_id',
+                                                           :join_table => 'tags_hierarchy'
+
+
   has_and_belongs_to_many :transitive_children, :class_name => 'Tag', :foreign_key => 'tag_id',
                                                           :association_foreign_key => 'child_id',
                                                           :join_table => 'tags_transitive_hierarchy'
@@ -19,7 +24,19 @@ class Tag < ActiveRecord::Base
                                                            :association_foreign_key => 'synonym_id',
                                                            :join_table => 'tags_synonyms'
 
+  named_scope :with_joined_hierarchy, { 
+   :joins => "LEFT OUTER JOIN tags_hierarchy AS tags_hierarchy_parent ON tags_hierarchy_parent.tag_id = #{Tag.table_name}.id "+
+             "LEFT OUTER JOIN tags_hierarchy AS tags_hierarchy_child ON tags_hierarchy_child.child_id = #{Tag.table_name}.id "+
+             "LEFT OUTER JOIN tags_synonyms AS tags_synonyms_left ON tags_synonyms_left.tag_id = #{Tag.table_name}.id " +
+             "LEFT OUTER JOIN tags_synonyms AS tags_synonyms_right ON tags_synonyms_right.synonym_id = #{Tag.table_name}.id "}
   
+  
+  # Scopes for "With joined hierarchy"
+  named_scope :without_children, { :conditions => 'tags_hierarchy_parent.child_id IS NULL' }
+  named_scope :without_parents, { :conditions => 'tags_hierarchy_child.tag_id IS NULL' }
+  named_scope :without_synonyms, { :conditions => 'tags_synonyms_left.synonym_id IS NULL AND tags_synonyms_right.tag_id IS NULL' }
+
+
   # LIKE is used for cross-database case-insensitivity
   def self.find_or_create_with_like_by_name(name)
     find_with_like_by_name(name) || create(:name => name)
