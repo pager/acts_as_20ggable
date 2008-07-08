@@ -5,13 +5,18 @@ ActiveRecord::Schema.define :version => 0 do
   
   create_table :tags_hierarchy, :force => true, :id => false do |t|
     t.column :tag_id, :integer
-    t.column :parent_id, :integer
+    t.column :child_id, :integer
   end
   
   create_table :tags_transitive_hierarchy, :force => true, :id => false do |t|
     t.column :tag_id, :integer
     t.column :child_id, :integer
   end
+
+  create_table :tags_synonyms, :force => true, :id => false do |t|
+    t.column :tag_id, :integer
+    t.column :synonym_id, :integer
+  end  
 
   create_table :taggings, :force => true do |t|
     t.column :tag_id, :integer

@@ -7,13 +7,17 @@ class Tag < ActiveRecord::Base
   cattr_accessor :destroy_unused
   self.destroy_unused = false
   
-  has_and_belongs_to_many :parents, :class_name => 'Tag', :foreign_key => 'tag_id',
-                                                          :association_foreign_key => 'parent_id',
-                                                          :join_table => 'tags_hierarchy'
+  has_and_belongs_to_many :children, :class_name => 'Tag', :foreign_key => 'tag_id',
+                                                           :association_foreign_key => 'child_id',
+                                                           :join_table => 'tags_hierarchy'
 
   has_and_belongs_to_many :transitive_children, :class_name => 'Tag', :foreign_key => 'tag_id',
                                                           :association_foreign_key => 'child_id',
                                                           :join_table => 'tags_transitive_hierarchy'
+
+  has_and_belongs_to_many :synonyms, :class_name => 'Tag', :foreign_key => 'tag_id',
+                                                           :association_foreign_key => 'synonym_id',
+                                                           :join_table => 'tags_synonyms'
 
   
   # LIKE is used for cross-database case-insensitivity
