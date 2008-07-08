@@ -11,6 +11,8 @@ class TagHierarchyBuilder
 #protected
   def self.dump_hierarchy
     tags_without_children = Tag.with_joined_hierarchy.without_children.with_parents.find(:all)
+    # Может ли быть такой, чтобы он был with_children, without_parents, НО мы бы не пришли к нему 
+    # от какого-нибудь выбранного при том, что граф ациклический? Нет, для этого нужен цикл.
   end
   
   def self.dump_synonyms
