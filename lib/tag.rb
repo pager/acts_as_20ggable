@@ -1,8 +1,14 @@
 class Tag < ActiveRecord::Base
+  class HierarchyCycle < StandardError; end
+  
+  # TODO валидация того, что в начале и конце не пробелы
+  SYMBOL = /[^#=\/]/.freeze
+  
   has_many :taggings, :dependent => :destroy
   
   validates_presence_of :name
   validates_uniqueness_of :name
+  validates_format_of :name, :with => /\A#{SYMBOL}*\Z/
   
   cattr_accessor :destroy_unused
   self.destroy_unused = false
