@@ -17,6 +17,11 @@ class TagHierarchyBuilder
           instantiate_synonyms(line)
           next
         end
+
+        if line =~ /^\s*#{Tag::SYMBOL}+\s*(\/\s*#{Tag::SYMBOL}+\s*)+$/
+          instantiate_hierarchy(line)
+          next
+        end
         
         raise WrongSpecificationSyntax.new("Line #{line}")
       end
@@ -25,8 +30,7 @@ class TagHierarchyBuilder
   
   # Input should be validated
   def self.instantiate_synonyms(line)
-
-    # TODO validate synonyms repetitions? 
+    # TODO validate synonyms repetition? Like Cat = Kitty and Kitty = Cat
     syns = line.split('=').map(&:strip)
     b = Tag.find_or_create_with_like_by_name(syns.shift)
     syns.each do |syn|

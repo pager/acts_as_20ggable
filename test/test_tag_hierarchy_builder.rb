@@ -3,8 +3,9 @@ require File.dirname(__FILE__) + '/abstract_unit'
 class TagHierarchyBuilderTest < Test::Unit::TestCase
   fixtures :tags, :tags_hierarchy, :tags_synonyms
 
-  def hierarchy_blank?
-    Tag.find(:all).all? { |tag| tag.parents.empty? && tag.children.empty? && tag.synonyms.empty? }
+  def hierarchy_blank?(options = {})
+    except = [ options[:except] ].flatten.compact
+    Tag.find(:all).all? { |tag| !except.include?(tag.name) || (tag.parents.empty? && tag.children.empty? && tag.synonyms.empty?) }.inspect
   end
   
   def test_dump_hierarchy
@@ -53,6 +54,10 @@ class TagHierarchyBuilderTest < Test::Unit::TestCase
     
     assert_equal Tag.find_with_like_by_name("Cat").synonyms.map(&:name).sort,
                  ['Racehorse', 'Problem'].sort
+                 
+    assert hierarchy_blank?(:except => 'Cat')
   end
+  
+  
 
 end
