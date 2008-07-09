@@ -31,7 +31,7 @@ class TagHierarchyBuilder
         end
       end
       
-      
+      hierarchy_acyclic? or raise Tag::HierarchyCycle.new
     end
   end
   
@@ -39,9 +39,10 @@ class TagHierarchyBuilder
   def self.instantiate_synonyms(line)
     # TODO validate synonyms repetition? Like Cat = Kitty and Kitty = Cat
     syns = line.split('=').map(&:strip)
-    b = Tag.find_or_create_with_like_by_name(syns.shift)
+    
+    b = Tag.find_or_create_with_like_by_name!(syns.shift)
     syns.each do |syn|
-      b.synonyms << Tag.find_or_create_with_like_by_name(syn)
+      b.synonyms << Tag.find_or_create_with_like_by_name!(syn)
     end
   end
 
@@ -49,15 +50,17 @@ class TagHierarchyBuilder
     line = line.split('/').map(&:strip)
     
     line.each_cons(2) do |(p, c)|
-      p = Tag.find_or_create_with_like_by_name(p)
-      c = Tag.find_or_create_with_like_by_name(c)
+      p = Tag.find_or_create_with_like_by_name!(p)
+      c = Tag.find_or_create_with_like_by_name!(c)
+      
+      raise Tag::HierarchyCycle.new if c.parents.include?(p) || c == p 
       
       c.parents << p
     end
   end
 
   def self.hierarchy_acyclic?
-    # FIXME Again, naive.
+    # FIXME Again, naive. И не работает. Мы дампаем цепочки от without_children. А если цикл — таких просто может не быть :)
     dump_hierarchy and return true
   rescue Tag::HierarchyCycle => e
     return false    

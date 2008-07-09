@@ -9,6 +9,7 @@ class Tag < ActiveRecord::Base
   validates_presence_of :name
   validates_uniqueness_of :name
   validates_format_of :name, :with => /\A#{SYMBOL}*\Z/
+  validates_format_of :name, :with => /\A\S\Z|\A\S.*\S\Z/
   
   cattr_accessor :destroy_unused
   self.destroy_unused = false
@@ -52,6 +53,10 @@ class Tag < ActiveRecord::Base
   # LIKE is used for cross-database case-insensitivity
   def self.find_or_create_with_like_by_name(name)
     find_with_like_by_name(name) || create(:name => name)
+  end
+
+  def self.find_or_create_with_like_by_name!(name)
+    find_with_like_by_name(name) || create!(:name => name)
   end
 
   def self.find_with_like_by_name(name)
