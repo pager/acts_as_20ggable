@@ -50,7 +50,7 @@ class TagHierarchyBuilderTest < Test::Unit::TestCase
   end
 
   def test_rebuild_hierarchy_with_synonyms
-    TagHierarchyBuilder.rebuild_hierarchy(['Cat = Racehorse = Problem'])    
+    TagHierarchyBuilder.rebuild_hierarchy(['   Cat   =   Racehorse   =   Problem  '])    
     
     assert_equal Tag.find_with_like_by_name("Cat").synonyms.map(&:name).sort,
                  ['Racehorse', 'Problem'].sort
@@ -58,6 +58,34 @@ class TagHierarchyBuilderTest < Test::Unit::TestCase
     assert hierarchy_blank?(:except => 'Cat')
   end
   
-  
+  def test_rebuild_hierarchy_with_synonyms_and_parents
+    TagHierarchyBuilder.rebuild_hierarchy(['Cat = Racehorse = Problem', '   Animals  /  Cat /   Kitty  '])    
+    
+    assert_equal Tag.find_with_like_by_name("Cat").synonyms.map(&:name).sort,
+                 ['Racehorse', 'Problem'].sort
+                 
+    assert_equal Tag.find_with_like_by_name("Cat").parents.map(&:name).sort,
+                ['Animals'].sort
+    assert_equal Tag.find_with_like_by_name("Kitty").parents.map(&:name).sort,
+                ['Cat'].sort
+    assert hierarchy_blank?(:except => ['Cat', 'Animals', 'Kitty'])
+  end
+
+
+  def test_rebuild_hierarchy_with_invalid_lines
+    assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['/ HEY / YO '])}
+    assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['HEY / YO/'])}
+
+    # FIXME
+    # assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy([' / HEY / YO '])}
+    # assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['HEY / YO/ '])}
+
+    assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['= HEY = YO '])}
+    assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['HEY = YO='])}
+
+    # FIXME
+    # assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy([' = HEY = YO '])}
+    # assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['HEY = YO= '])}
+  end
 
 end

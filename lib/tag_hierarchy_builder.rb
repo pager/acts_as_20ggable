@@ -1,6 +1,8 @@
 class TagHierarchyBuilder
   class WrongSpecificationSyntax < StandardError; end
   
+  # FIXME а ведь можно намутить цикл при помощи сочетания синонимов и иерархии. 
+  # TODO Отказывать синонимам участвовать в иерархии?
   def self.rebuild_hierarchy(specification)
     # TODO save old hierarchy somewhere.
     
@@ -12,19 +14,24 @@ class TagHierarchyBuilder
       specification.each do |line|
         next if line.blank?
         next if line =~ /^\s*#.*/ # If line is a comment
-        
-        if line =~ /^\s*#{Tag::SYMBOL}+\s*(=\s*#{Tag::SYMBOL}+\s*)+$/
-          instantiate_synonyms(line)
-          next
-        end
+        begin
+          if line =~ /^\s*#{Tag::SYMBOL}+\s*(=\s*#{Tag::SYMBOL}+\s*)+$/
+            instantiate_synonyms(line)
+            next
+          end
 
-        if line =~ /^\s*#{Tag::SYMBOL}+\s*(\/\s*#{Tag::SYMBOL}+\s*)+$/
-          instantiate_hierarchy(line)
-          next
-        end
+          if line =~ /^\s*#{Tag::SYMBOL}+\s*(\/\s*#{Tag::SYMBOL}+\s*)+$/
+            instantiate_hierarchy(line)
+            next
+          end
         
-        raise WrongSpecificationSyntax.new("Line #{line}")
+          raise WrongSpecificationSyntax.new("Line #{line}")
+        rescue ActiveRecord::RecordInvalid => e
+          raise WrongSpecificationSyntax.new("Line #{line}")
+        end
       end
+      
+      
     end
   end
   
@@ -38,6 +45,16 @@ class TagHierarchyBuilder
     end
   end
 
+  def self.instantiate_hierarchy(line)
+    line = line.split('/').map(&:strip)
+    
+    line.each_cons(2) do |(p, c)|
+      p = Tag.find_or_create_with_like_by_name(p)
+      c = Tag.find_or_create_with_like_by_name(c)
+      
+      c.parents << p
+    end
+  end
 
   def self.hierarchy_acyclic?
     # FIXME Again, naive.
