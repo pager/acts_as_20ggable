@@ -2,7 +2,34 @@ class TagHierarchyBuilder
   class WrongSpecificationSyntax < StandardError; end
 
   def self.rebuild_transitive_closure
-    # (5) :)
+    Tag.transaction do 
+      Tag.connection.execute('DELETE from tags_transitive_hierarchy')
+         
+      tags = Tag.find(:all)
+      transitive_children = { }
+      
+      tags.each do |tag|
+        transitive_children[tag] = []
+        tag.children.each do |tag_child|
+          transitive_children[tag] << tag_child
+        end        
+      end
+      
+      tags.each do |tag1|
+        tags.each do |tag2|
+          tags.each do |tag3|
+            next if transitive_children[tag3].include?(tag2)
+            if (transitive_children[tag3].include?(tag1) && transitive_children[tag1].include?(tag2))
+              transitive_children[tag3] << tag2
+            end
+          end
+        end
+      end 
+      
+      tags.each do |tag|
+        tag.transitive_children = transitive_children[tag]
+      end
+    end
   end
   
   def self.rebuild_hierarchy(specification)
@@ -34,7 +61,7 @@ class TagHierarchyBuilder
       end
             
       hierarchy_acyclic? or raise Tag::HierarchyCycle
-      
+      rebuild_transitive_closure
     end
   end
   
@@ -85,7 +112,7 @@ class TagHierarchyBuilder
       (reclambda do |this, tag|        
         return false if tags_status[tag] == :processing
         tags_status[tag] = :processing
-        tag.parents.any? do |child|
+        tag.children.any? do |child|
           this.call(child)
         end
         tags_status[tag] = :closed
