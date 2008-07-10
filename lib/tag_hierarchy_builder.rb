@@ -1,8 +1,10 @@
 class TagHierarchyBuilder
   class WrongSpecificationSyntax < StandardError; end
+
+  def self.rebuild_transitive_closure
+    # (5) :)
+  end
   
-  # FIXME а ведь можно намутить цикл при помощи сочетания синонимов и иерархии. 
-  # TODO Отказывать синонимам участвовать в иерархии?
   def self.rebuild_hierarchy(specification)
     # TODO save old hierarchy somewhere.
     
@@ -30,14 +32,25 @@ class TagHierarchyBuilder
           raise WrongSpecificationSyntax.new("Line #{line}")
         end
       end
+            
+      hierarchy_acyclic? or raise Tag::HierarchyCycle
       
-      hierarchy_acyclic? or raise Tag::HierarchyCycle.new
     end
   end
   
   # Input should be validated
   def self.instantiate_synonyms(line)
-    # TODO validate synonyms repetition? Like Cat = Kitty and Kitty = Cat
+    # (2) TODO validate synonyms repetition? Like Cat = Kitty and Kitty = Cat
+    # То есть ни один из «синонимов» не может быть в «стволе»
+    # (3) FIXME а ведь можно намутить цикл при помощи сочетания синонимов и иерархии. 
+    # Ни один из синонимов не может участвовать в «иерархии»
+    # То есть нам нужна flat иерархия, flat ствол и flat синонимы
+    # Причём хранить с номерами строк и выдавать ошибки «в такой-то строке»
+    # (4) TODO Мы хотим гламурные сообщения о циклах. Для этого опять-таки нужно можно воспользоваться тем flatten.
+    # Итого тесты. Сообщения об ошибках: 
+    # "Левый синтаксис в строке 5"
+    # "Синоним AAA из строки 15 участвует в иерархии в строках …" 
+    # "Синоним BBB из строки 15 повторяется в строке …"    
     syns = line.split('=').map(&:strip)
     
     b = Tag.find_or_create_with_like_by_name!(syns.shift)
@@ -60,10 +73,25 @@ class TagHierarchyBuilder
   end
 
   def self.hierarchy_acyclic?
-    # FIXME Again, naive. И не работает. Мы дампаем цепочки от without_children. А если цикл — таких просто может не быть :)
-    dump_hierarchy and return true
-  rescue Tag::HierarchyCycle => e
-    return false    
+    # FIXME Again, naive and unoptimized
+    tags = Tag.find(:all)
+    visited_tags = []
+    
+    tags_status = tags.map { |x| [ x, :unvisited ] }.flatten
+    tags_status = Hash[*tags_status]
+           
+    tags.each do |tag|
+      next if tags_status[tag] != :unvisited
+      (reclambda do |this, tag|        
+        return false if tags_status[tag] == :processing
+        tags_status[tag] = :processing
+        tag.parents.any? do |child|
+          this.call(child)
+        end
+        tags_status[tag] = :closed
+      end).call(tag)
+    end
+    return true
   end
   
   # ==== DUMPER ======
@@ -110,4 +138,19 @@ class TagHierarchyBuilder
     Tag.with_joined_hierarchy_and_synonyms.without_children.without_parents.without_synonyms.
         find(:all, :select => 'name', :order => 'name ASC').map(&:name)
   end
+end
+
+# FIXME move somewhere, uhm
+def reclambda
+  lambda do |f|
+    f.call(f)
+  end.call(lambda do |f|
+             lambda do |this|
+               lambda do |*args|
+                 yield(this, *args)
+               end
+             end.call(lambda do |x|
+                       f.call(f).call(x)
+                      end)
+           end)
 end
