@@ -4,7 +4,9 @@ class TagHierarchyBuilder
   def self.rebuild_transitive_closure
     Tag.transaction do 
       Tag.connection.execute('DELETE from tags_transitive_hierarchy')
-         
+
+      # (0) — тесты!
+      # OPTIMIZE
       tags = Tag.find(:all)
       transitive_children = { }
       
@@ -26,6 +28,8 @@ class TagHierarchyBuilder
         end
       end 
       
+      # (1) - добавлять синонимы :-P
+      
       tags.each do |tag|
         tag.transitive_children = transitive_children[tag]
       end
@@ -36,7 +40,6 @@ class TagHierarchyBuilder
     # TODO save old hierarchy somewhere.
     
     Tag.transaction do
-      # Clear join tables
       Tag.connection.execute('DELETE from tags_hierarchy')
       Tag.connection.execute('DELETE from tags_synonyms')
       
@@ -100,7 +103,7 @@ class TagHierarchyBuilder
   end
 
   def self.hierarchy_acyclic?
-    # FIXME Again, naive and unoptimized
+    # OPTIMIZE
     tags = Tag.find(:all)
     visited_tags = []
     
@@ -135,7 +138,7 @@ class TagHierarchyBuilder
   def self.dump_hierarchy
     tags_chains = Tag.with_joined_hierarchy.without_children.with_parents.find(:all).map { |x| [x] }
 
-    # FIXME Soooo naive
+    # OPTIMIZE
     while chain = tags_chains.detect { |chain| !chain.first.parents.empty? }
       tags_chains.delete(chain)
       chain.first.parents.each do |parent|
@@ -148,7 +151,7 @@ class TagHierarchyBuilder
   end  
   
   def self.dump_synonyms
-    # FIXME N+1
+    # OPTIMIZE N+1
     tags_with_synonyms = Tag.find(:all, 
                                   :joins => :synonyms, 
                                   :select => 'DISTINCT tags.*', 
@@ -161,7 +164,7 @@ class TagHierarchyBuilder
   end
   
   def self.dump_orphans
-    # FIXME Benchmark it :)
+    # OPTIMIZE
     Tag.with_joined_hierarchy_and_synonyms.without_children.without_parents.without_synonyms.
         find(:all, :select => 'name', :order => 'name ASC').map(&:name)
   end
