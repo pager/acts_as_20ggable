@@ -71,33 +71,26 @@ class TagHierarchyBuilderTest < Test::Unit::TestCase
     assert hierarchy_blank?(:except => ['Cat', 'Kitty', 'Apple', 'Cocoa'])
   end
                 
-  
+                                      
   def test_rebuild_hierarchy_with_invalid_lines
     assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['/ HEY / YO '])}
     assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['HEY / YO/'])}
-  
+      
     assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy([' / HEY / YO '])}
     assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['HEY / YO/ '])}
-  
+      
     assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['= HEY = YO '])}
     assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['HEY = YO='])}
-  
+      
     assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy([' = HEY = YO '])}
     assert_raise(TagHierarchyBuilder::WrongSpecificationSyntax) { TagHierarchyBuilder.rebuild_hierarchy(['HEY = YO= '])}
-  
-    # FIXME !!!
-    # assert !hierarchy_blank?     
   end
   
   def test_rebuild_hierarchy_with_cycles
     assert_raise(Tag::HierarchyCycle) { TagHierarchyBuilder.rebuild_hierarchy(['Apple/Cocoa/Banana/Apple', 'Apple/Delta'])}
     assert_raise(Tag::HierarchyCycle) { TagHierarchyBuilder.rebuild_hierarchy(['Apple/Apple'])}
-    # FIXME — смотри алгоритм ;)
+
     assert_raise(Tag::HierarchyCycle) { TagHierarchyBuilder.rebuild_hierarchy(['Apple/Cocoa/Banana/Apple'])}
-    assert_raise(Tag::HierarchyCycle) { TagHierarchyBuilder.rebuild_hierarchy(['Apple/Cocoa/Banana/Apple/Cocoa'])}
-    
-    # FIXME !!!
-    # assert !hierarchy_blank? 
-  end
-                                                           
+    assert_raise(Tag::HierarchyCycle) { TagHierarchyBuilder.rebuild_hierarchy(['Apple/Cocoa/Banana/Apple/Cocoa'])}    
+  end                                                                                      
 end
