@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/abstract_unit'
 
 class TestActsAsTaggable < Test::Unit::TestCase
-  fixtures :tags, :taggings, :posts, :users, :photos, :subscriptions, :magazines
+  fixtures :tags, :taggings, :posts, :users, :photos, :subscriptions, :magazines, :tags_transitive_hierarchy
 
   def test_find_related_tags_with
     assert_equivalent [tags(:good), tags(:bad), tags(:question)], Post.find_related_tags("nature")

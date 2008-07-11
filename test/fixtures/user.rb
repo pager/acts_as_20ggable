@@ -4,4 +4,6 @@ class User < ActiveRecord::Base
   
   has_many :subscriptions
   has_many :magazines, :through => :subscriptions
+  
+  has_many :videos
 end

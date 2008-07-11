@@ -147,3 +147,16 @@ ruby_good:
   taggable_id: 1
   taggable_type: Magazine
   created_at: 2007-08-25
+
+# Videos
+jonathan_good_cat_cat:
+  id: 100
+  tag_id: 13
+  taggable_id: 1
+  taggable_type: Video
+
+sam_kitten_kitten:
+  id: 101
+  tag_id: 14
+  taggable_id: 2
+  taggable_type: Video

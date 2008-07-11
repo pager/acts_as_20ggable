@@ -70,6 +70,7 @@ module ActiveRecord #:nodoc:
         def find_options_for_find_tagged_with(tags, options = {})
           tags = tags.is_a?(Array) ? TagList.new(tags.map(&:to_s)) : TagList.from(tags)
           options = options.dup
+          exclude_subtags = options.delete(:exclude_subtags)
           
           return {} if tags.empty?
           
@@ -79,7 +80,7 @@ module ActiveRecord #:nodoc:
           taggings_alias, tags_alias = "#{table_name}_taggings", "#{table_name}_tags"
                     
           if options.delete(:exclude)
-            tc = tags_condition(tags, Tag.table_name, !options.delete(:exclude_subtags))            
+            tc = tags_condition(tags, Tag.table_name, !exclude_subtags)            
             conditions << <<-END
               #{table_name}.id NOT IN
                 (SELECT #{Tagging.table_name}.taggable_id FROM #{Tagging.table_name}
@@ -88,7 +89,7 @@ module ActiveRecord #:nodoc:
             END
           else
             if options.delete(:match_all)
-              tc = tags_condition(tags, Tag.table_name, !options.delete(:exclude_subtags))            
+              tc = tags_condition(tags, Tag.table_name, !exclude_subtags)
               conditions << <<-END
                 (SELECT COUNT(*) FROM #{Tagging.table_name}
                  INNER JOIN #{Tag.table_name} ON #{Tagging.table_name}.tag_id = #{Tag.table_name}.id
@@ -145,10 +146,9 @@ module ActiveRecord #:nodoc:
         def tags_condition(tags, table_name = Tag.table_name, include_subtags = true)
           # FIXME N+1
           tags += tags.map do |tag_name| 
-            tag = Tag.find_with_like_by_name(tag_name)            
-            tag ? tag.transitive_children.find(:all) : []
+            tag = Tag.find_with_like_by_name(tag_name)
+            tag ? tag.transitive_children.find(:all).map(&:name) : []
           end.flatten if include_subtags
-          
           condition = tags.map { |t| sanitize_sql(["#{table_name}.name LIKE ?", t]) }.join(" OR ")
           "(" + condition + ")"
         end

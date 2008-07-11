@@ -39,6 +39,6 @@ class TestTag < Test::Unit::TestCase
   end
   
   def test_all_counts
-    assert_tag_counts Tag.counts, :good => 4, :bad => 2, :nature => 10, :question => 2, :animal => 3
+    assert_tag_counts Tag.counts, :good => 4, :bad => 2, :nature => 10, :question => 2, :animal => 3, :nature_animals_domestic_cat => 1, :nature_animals_domestic_cat_kitten => 1
   end
 end

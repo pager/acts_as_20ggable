@@ -1,0 +1,9 @@
+jonathan_good_cat:
+  id: 1
+  user_id: 1
+  title: Good cat
+
+sam_kitten:
+  id: 2
+  user_id: 2
+  title: Kitten
