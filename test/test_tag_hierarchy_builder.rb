@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/abstract_unit'
 
-class TagHierarchyBuilderTest < Test::Unit::TestCase
-  fixtures :tags, :tags_hierarchy, :tags_synonyms
+class TestTagHierarchyBuilder < Test::Unit::TestCase
+  fixtures :tags, :tags_hierarchy, :tags_synonyms, :tags_transitive_hierarchy
   
   def hierarchy_blank?(options = {})
     except = [ options[:except] ].flatten.compact
@@ -92,5 +92,17 @@ class TagHierarchyBuilderTest < Test::Unit::TestCase
 
     assert_raise(Tag::HierarchyCycle) { TagHierarchyBuilder.rebuild_hierarchy(['Apple/Cocoa/Banana/Apple'])}
     assert_raise(Tag::HierarchyCycle) { TagHierarchyBuilder.rebuild_hierarchy(['Apple/Cocoa/Banana/Apple/Cocoa'])}    
-  end                                                                                      
+  end
+  
+  def test_transitive_hierarchy_rebuilding_does_not_breaks_fixture
+    tags = Tag.find(:all)
+    old_hierarchy = tags.inject({}) { |memo, tag| memo[tag] = tag.transitive_children.find(:all).sort_by(&:name); memo }
+    
+    TagHierarchyBuilder.rebuild_transitive_closure
+    
+    tags = Tag.find(:all)
+    new_hierarchy = tags.inject({}) { |memo, tag| memo[tag] = tag.transitive_children.find(:all).sort_by(&:name); memo }
+
+    assert_equal old_hierarchy, new_hierarchy
+  end
 end

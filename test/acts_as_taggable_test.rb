@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/abstract_unit'
 
-class ActsAsTaggableOnSteroidsTest < Test::Unit::TestCase
+class TestActsAsTaggable < Test::Unit::TestCase
   fixtures :tags, :taggings, :posts, :users, :photos, :subscriptions, :magazines
 
   def test_find_related_tags_with

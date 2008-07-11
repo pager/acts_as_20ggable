@@ -1,0 +1,60 @@
+people_children:
+  tag_id: 6
+  child_id: 7
+
+people_nude:
+  tag_id: 6
+  child_id: 8
+  
+people_me:
+  tag_id: 6
+  child_id: 9
+
+nature_animals:
+  tag_id: 3
+  child_id: 10
+  
+nature_animals_horse:
+  tag_id: 10
+  child_id: 11
+  
+nature_horse:
+  tag_id: 3
+  child_id: 11
+  
+nature_animals_domestic:
+  tag_id: 10
+  child_id: 12
+  
+nature_domestic:
+  tag_id: 3
+  child_id: 12
+  
+nature_animals_domestic_cat:
+  tag_id: 12
+  child_id: 13
+  
+animals_cat:
+  tag_id: 10
+  child_id: 13
+  
+nature_cat:
+  tag_id: 3
+  child_id: 13
+
+nature_animals_domestic_cat_kitten:
+  tag_id: 13
+  child_id: 14
+  
+animals_kitten:
+  tag_id: 10
+  child_id: 14
+
+nature_kitten:
+  tag_id: 3
+  child_id: 14
+ 
+domestic_kitten:
+  tag_id: 12
+  child_id: 14
+
