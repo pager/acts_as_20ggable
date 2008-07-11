@@ -28,7 +28,12 @@ class TagHierarchyBuilder
         end
       end 
       
-      # (1) - добавлять синонимы :-P
+      tags.each do |tag|
+        tag.synonyms.each do |synonym|
+          transitive_children[tag] << synonym unless transitive_children[tag].include?(synonym)
+          transitive_children[synonym] << tag unless transitive_children[synonym].include?(tag)
+        end
+      end
       
       tags.each do |tag|
         tag.transitive_children = transitive_children[tag]

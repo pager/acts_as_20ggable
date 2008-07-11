@@ -57,4 +57,40 @@ nature_kitten:
 domestic_kitten:
   tag_id: 12
   child_id: 14
+  
+  
+cat_synonym_pussy:
+  tag_id: 13
+  child_id: 15
+
+cat_synonym_kitty:
+  tag_id: 13
+  child_id: 18
+
+horse_synonym_racehorse:
+  tag_id: 11
+  child_id: 16
+
+question_synonym_problem:
+  tag_id: 4
+  child_id: 17
+
+
+cat_synonym_pussy_rev:
+  child_id: 13
+  tag_id: 15
+
+cat_synonym_kitty_rev:
+  child_id: 13
+  tag_id: 18
+
+horse_synonym_racehorse_rev:
+  child_id: 11
+  tag_id: 16
+
+question_synonym_problem_rev:
+  child_id: 4
+  tag_id: 17
+
+  
 
