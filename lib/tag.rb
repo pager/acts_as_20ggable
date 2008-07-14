@@ -70,6 +70,10 @@ class Tag < ActiveRecord::Base
     name
   end
   
+  def to_param
+    name
+  end
+  
   def count
     read_attribute(:count).to_i
   end
