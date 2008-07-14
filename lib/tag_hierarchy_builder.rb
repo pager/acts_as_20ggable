@@ -51,6 +51,7 @@ class TagHierarchyBuilder
       specification.each do |line|
         next if line.blank?
         next if line =~ /^\s*#.*/ # If line is a comment
+        next if line =~ /^\s*#{Tag::SYMBOL}+\s*$/ # If line is a single tag
         begin
           if line =~ /^\s*#{Tag::SYMBOL}+\s*(=\s*#{Tag::SYMBOL}+\s*)+$/
             instantiate_synonyms(line)
