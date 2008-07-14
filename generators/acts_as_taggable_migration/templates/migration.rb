@@ -37,5 +37,8 @@ class ActsAsTaggableMigration < ActiveRecord::Migration
   def self.down
     drop_table :taggings
     drop_table :tags
+    drop_table :tags_hierarchy
+    drop_table :tags_transitive_hierarchy
+    drop_table :tags_synonyms
   end
 end
