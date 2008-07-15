@@ -150,7 +150,7 @@ module ActiveRecord #:nodoc:
             tag ? tag.transitive_children.find(:all).map(&:name) : []
           end.flatten if include_subtags
           condition = tags.map { |t| sanitize_sql(["#{table_name}.name LIKE ?", t]) }.join(" OR ")
-          "(" + condition + ")"
+          condition.blank? ? '(1=0)' : "(" + condition + ")"
         end
       end
       
