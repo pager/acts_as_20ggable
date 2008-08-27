@@ -7,7 +7,7 @@ class TagHierarchyBuilder
 
       # (0) — тесты!
       # OPTIMIZE
-      tags = Tag.find(:all)
+      tags = Tag.find(:all, :include => [:synonyms, :children])
       transitive_children = { }
       
       tags.each do |tag|
