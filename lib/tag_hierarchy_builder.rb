@@ -7,7 +7,7 @@ class TagHierarchyBuilder
 
       # (0) — тесты!
       # OPTIMIZE
-      tags = Tag.find(:all, :include => [:synonyms, :children])
+      tags = Tag.find(:all, :include => [:synonyms, :children, :transitive_children])
       transitive_children = { }
       
       tags.each do |tag|
@@ -26,7 +26,7 @@ class TagHierarchyBuilder
             end
           end
         end
-      end 
+      end      
       
       tags.each do |tag|
         tag.synonyms.each do |synonym|
@@ -110,7 +110,7 @@ class TagHierarchyBuilder
 
   def self.hierarchy_acyclic?
     # OPTIMIZE
-    tags = Tag.find(:all)
+    tags = Tag.find(:all, :include => [:children])
     visited_tags = []
     
     tags_status = tags.map { |x| [ x, :unvisited ] }.flatten
