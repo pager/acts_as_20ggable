@@ -17,16 +17,30 @@ class TagHierarchyBuilder
         end        
       end
       
-      tags.each do |tag1|
-        tags.each do |tag2|
-          tags.each do |tag3|
-            next if transitive_children[tag3].include?(tag2)
-            if (transitive_children[tag3].include?(tag1) && transitive_children[tag1].include?(tag2))
-              transitive_children[tag3] << tag2
+      visited_tags = []
+      root = {} ; comp = [] ; stack = []
+      tags.each do |outer_tag|
+        next if visited_tags.include?(outer_tag)
+        reclambda do |this, tag|
+          visited_tags << tag
+          root[tag] = tag; stack.push(tag)
+          tag.children.each do |child|
+            this.call(child) unless visited_tags.include?(child)
+            if !comp.include?(child)
+              root[tag] = visited_tags.index(tag) < visited_tags.index(child) ? tag : child
+            end
+            transitive_children[tag] += transitive_children[child]
+          end
+          if root[tag] == tag
+            loop do        
+              w = stack.pop
+              comp << w
+              transitive_children[w] = transitive_children[tag] # Pointer assignment!
+              break if w == tag
             end
           end
-        end
-      end      
+        end.call(outer_tag)
+      end     
       
       tags.each do |tag|
         tag.synonyms.each do |synonym|
@@ -36,7 +50,7 @@ class TagHierarchyBuilder
       end
       
       tags.each do |tag|
-        tag.transitive_children = transitive_children[tag]
+        tag.transitive_children = transitive_children[tag].uniq
       end
     end
   end
