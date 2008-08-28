@@ -98,7 +98,7 @@ module ActiveRecord #:nodoc:
                  #{tc}) = #{tags.size}
               END
             else
-              conditions << tags_condition(tags, tags_alias)
+              conditions << tags_condition(tags, tags_alias, !exclude_subtags)
             end
           end
           
@@ -199,7 +199,7 @@ module ActiveRecord #:nodoc:
         #
         # The possible options are the same as the tag_counts class method, excluding :conditions.
         def tag_counts(options = {})
-          self.class.tag_counts({ :conditions => self.class.send(:tags_condition, tag_list) }.reverse_merge!(options))
+          self.class.tag_counts({ :conditions => self.class.send(:tags_condition, tag_list, Tag.table_name, false) }.reverse_merge!(options))
         end
         
         def reload_with_tag_list(*args) #:nodoc:
