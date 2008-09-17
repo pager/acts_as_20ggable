@@ -147,11 +147,11 @@ class TagHierarchyBuilder
   # ==== DUMPER ======
   
   def self.dump_tags
-    ['# Категории'] +
+    ['# Categories'] +
     dump_hierarchy.map { |chain| chain * ' / '} +
-    ['', '# Синонимы'] +
+    ['', '# Synonyms'] +
     dump_synonyms.map { |chain| chain * ' = '} +
-    ['', '# Ещё не имеют связей'] +
+    ['', '# Unlinked tags'] +
     dump_orphans
   end
   
