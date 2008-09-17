@@ -1,4 +1,4 @@
-class ActsAsTaggableMigrationGenerator < Rails::Generator::Base 
+class ActsAs20ggableMigrationGenerator < Rails::Generator::Base 
   def manifest 
     record do |m| 
       m.migration_template 'migration.rb', 'db/migrate' 
@@ -6,6 +6,6 @@ class ActsAsTaggableMigrationGenerator < Rails::Generator::Base
   end
   
   def file_name
-    "acts_as_taggable_migration"
+    "acts_as_20ggable_migration"
   end
 end
