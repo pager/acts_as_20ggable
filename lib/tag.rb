@@ -1,6 +1,6 @@
 class Tag < ActiveRecord::Base
   class HierarchyCycle < StandardError; end
-  
+    
   # TODO валидация того, что в начале и конце не пробелы
   SYMBOL = /[^#=\/]/.freeze
   
@@ -78,6 +78,10 @@ class Tag < ActiveRecord::Base
     read_attribute(:count).to_i
   end
   
+  def marked?
+    read_attribute(:mark).to_i == 1
+  end
+  
   class << self
     # Calculate the tag counts for all tags.
     #  :start_at - Restrict the tags to those created after a certain time
@@ -87,12 +91,15 @@ class Tag < ActiveRecord::Base
     #  :order - A piece of SQL to order by. Eg 'count desc' or 'taggings.created_at desc'
     #  :at_least - Exclude tags with a frequency less than the given value
     #  :at_most - Exclude tags with a frequency greater than the given value
+    #  :mark_condition - Set 'mark' attribute on tags conforms this condition
+    #                    primarliy used with per-user taggings like ['taggings.create_by_id = ?', user.id]
+
     def counts(options = {})
       find(:all, options_for_counts(options))
     end
     
     def options_for_counts(options = {})
-      options.assert_valid_keys :start_at, :end_at, :conditions, :at_least, :at_most, :order, :limit, :joins
+      options.assert_valid_keys :start_at, :end_at, :conditions, :at_least, :at_most, :order, :limit, :joins, :mark_condition
       options = options.dup
       
       start_at = sanitize_sql(["#{Tagging.table_name}.created_at >= ?", options.delete(:start_at)]) if options[:start_at]
@@ -106,6 +113,13 @@ class Tag < ActiveRecord::Base
       
       conditions = conditions.any? ? conditions.join(' AND ') : nil
       
+      mark_condition = options.delete(:mark_condition)
+      mark_condition = sanitize_sql(mark_condition) if mark_condition
+      mark_select = "GROUP_CONCAT(DISTINCT IF((#{sanitize_sql(mark_condition)}), 1, NULL)) as mark" if mark_condition
+      base_select = "#{Tag.table_name}.id, #{Tag.table_name}.name, COUNT(*) AS count"
+      
+      select = [ base_select, mark_select ].compact.join(', ') 
+      
       joins = ["INNER JOIN #{Tagging.table_name} ON #{Tag.table_name}.id = #{Tagging.table_name}.tag_id"]
       joins << options.delete(:joins) if options[:joins]
       
@@ -115,7 +129,7 @@ class Tag < ActiveRecord::Base
       group_by  = "#{Tag.table_name}.id, #{Tag.table_name}.name HAVING COUNT(*) > 0"
       group_by << " AND #{having}" unless having.blank?
       
-      { :select     => "#{Tag.table_name}.id, #{Tag.table_name}.name, COUNT(*) AS count", 
+      { :select     => select,
         :joins      => joins.join(" "),
         :conditions => conditions,
         :group      => group_by
